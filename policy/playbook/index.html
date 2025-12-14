@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cooling the Furnace — Rights-First Policy Playbook</title>
+<meta name="description" content="A long-form, interactive playbook to cool overreach in Finance, Climate, AI, and Security with Source-aligned guardrails: precise, accountable, reversible.">
+<meta name="theme-color" content="#0d0f16">
+
+<!-- Open Graph / Twitter -->
+<meta property="og:title" content="Cooling the Furnace — Rights-First Policy Playbook">
+<meta property="og:description" content="Overreach → Backlash → Salvage → Drift. Here’s how we cool the furnace across Finance, Climate, AI, and Security.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'%3E%3Crect width='100%25' height='100%25' fill='%230d0f16'/%3E%3Ctext x='50%25' y='55%25' font-family='sans-serif' font-size='64' fill='%23a7f3d0' text-anchor='middle'%3ECooling the Furnace%3C/text%3E%3C/svg%3E">
+
+<style>
+  :root{
+    --bg: #0d0f16;       /* night */
+    --bg-soft:#121521;
+    --text:#e6e8ef;
+    --muted:#b1b6c6;
+    --brand:#8b5cf6;     /* violet */
+    --brand-2:#22d3ee;   /* cyan */
+    --ok:#10b981;        /* green */
+    --warn:#f59e0b;      /* amber */
+    --bad:#ef4444;       /* red */
+    --card:#0f1320;
+    --card-2:#14192a;
+    --ring: rgba(34, 211, 238, .35);
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f7f9ff;
+      --bg-soft:#eef2ff;
+      --text:#111827;
+      --muted:#4b5563;
+      --brand:#6d28d9;
+      --brand-2:#0891b2;
+      --ok:#059669;
+      --warn:#b45309;
+      --bad:#b91c1c;
+      --card:#ffffff;
+      --card-2:#f8fafc;
+      --ring: rgba(99,102,241,.25);
+      --shadow: 0 8px 20px rgba(0,0,0,.08);
+    }
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:radial-gradient(1200px 1200px at 80% -10%, rgba(139,92,246,.12), transparent 60%),
+              radial-gradient(1100px 900px at -10% 80%, rgba(34,211,238,.10), transparent 60%),
+              var(--bg);
+    color:var(--text); font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+  }
+
+  /* Subtle animated starfield */
+  .sky{
+    position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .stars, .twinkles{
+    position:absolute; inset:-50% -50%; background-repeat:repeat; will-change:transform,opacity; opacity:.35;
+    animation: drift 120s linear infinite;
+    filter: drop-shadow(0 0 1px rgba(255,255,255,.6));
+  }
+  .stars{
+    background-image: radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,.7), transparent 60%),
+                      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,.6), transparent 60%),
+                      radial-gradient(1px 1px at 220px 150px, rgba(255,255,255,.8), transparent 60%);
+    background-size: 240px 240px;
+    transform: translate3d(0,0,0) scale(2);
+  }
+  .twinkles{
+    background-image: radial-gradient(1px 1px at 80px 60px, rgba(255,255,255,.8), transparent 60%),
+                      radial-gradient(1px 1px at 180px 200px, rgba(255,255,255,.9), transparent 60%);
+    background-size: 300px 300px; animation-duration: 140s; opacity:.22;
+  }
+  @keyframes drift{
+    from{ transform: translate3d(0,0,0) scale(2)}
+    to{   transform: translate3d(-10%, -10%,0) scale(2)}
+  }
+
+  header{
+    position:sticky; top:0; z-index:5; backdrop-filter: blur(10px);
+    background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0)) , transparent;
+    padding: 18px 18px 8px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding: 0 10px}
+  h1{
+    margin:4px 0 8px; font-weight:800; letter-spacing:.3px;
+    line-height:1.15; font-size: clamp(22px, 2.4vw + 12px, 38px);
+    background: linear-gradient(90deg, var(--brand), var(--brand-2));
+    -webkit-background-clip: text; background-clip:text; color: transparent;
+  }
+  .subtitle{color:var(--muted); margin-top:-4px}
+
+  .toolbar{
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0 6px;
+  }
+  .chip{
+    border:1px solid rgba(255,255,255,.12); padding:8px 12px; border-radius:999px; color:var(--muted);
+    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02));
+    display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+    transition: transform .2s ease, border-color .2s, background .2s;
+  }
+  .chip[aria-pressed="true"]{ border-color: var(--brand-2); color:#fff; box-shadow: inset 0 0 0 1px var(--ring)}
+  .chip:hover{ transform: translateY(-1px) }
+  .chip svg{ width:18px; height:18px; opacity:.8 }
+
+  .search{
+    flex:1 1 220px; display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+    background:var(--card); border:1px solid rgba(255,255,255,.08); box-shadow: var(--shadow);
+  }
+  .search input{
+    background:transparent; border:0; outline:0; color:var(--text); width:100%; font-size:15px;
+  }
+
+  .grid{
+    display:grid; grid-template-columns: 1fr; gap:14px; margin:14px 0 60px;
+  }
+  @media (min-width:900px){
+    .grid{ grid-template-columns: 1fr 1fr }
+  }
+
+  .card{
+    position:relative; z-index:1;
+    background:linear-gradient(180deg, var(--card), var(--card-2));
+    border:1px solid rgba(255,255,255,.07); border-radius: var(--radius); box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .card header{
+    position:relative; top:auto; backdrop-filter:none; background:none; border:0; padding:0; z-index:2;
+  }
+  .card-head{
+    padding:18px 18px 0 18px;
+  }
+  .pill{display:inline-block; font-size:12px; letter-spacing:.3px; text-transform:uppercase;
+    color:#fff; background:linear-gradient(90deg, var(--brand), var(--brand-2)); padding:6px 10px; border-radius:999px}
+  .title{
+    margin:10px 0 6px; font-size: clamp(18px, 1.1vw + 14px, 24px); font-weight:800;
+  }
+  .lede{ color:var(--muted); margin:0 0 12px }
+
+  details{
+    border-top:1px dashed rgba(255,255,255,.15);
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent 40%);
+  }
+  summary{
+    list-style:none; cursor:pointer; padding:16px 18px; display:flex; align-items:center; gap:10px; user-select:none;
+  }
+  summary::-webkit-details-marker{display:none}
+  .caret{ transition: transform .25s ease }
+  details[open] .caret{ transform: rotate(90deg) }
+  .content{ padding:0 18px 18px 48px; color:var(--text) }
+  .badge{ font-size:12px; color:#fff; padding:4px 8px; border-radius:6px }
+  .ok{ background: linear-gradient(90deg, var(--ok), #34d399) }
+  .warn{ background: linear-gradient(90deg, var(--warn), #fbbf24) }
+  .bad{ background: linear-gradient(90deg, var(--bad), #f87171) }
+
+  .section-tools{
+    display:flex; flex-wrap:wrap; gap:8px; padding:12px 18px 18px
+  }
+  button, .button{
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.1));
+    border:1px solid rgba(255,255,255,.14); color:var(--text); border-radius:10px; padding:10px 12px;
+    cursor:pointer; display:inline-flex; gap:8px; align-items:center; transition:.2s transform;
+    box-shadow: var(--shadow);
+  }
+  button:hover, .button:hover{ transform: translateY(-1px) }
+  button:active{ transform: translateY(0) }
+  .ghost{ background:transparent; border-style:dashed }
+
+  .flow{
+    display:flex; gap:8px; flex-wrap:wrap; padding:0 18px 18px;
+  }
+  .flow .node{
+    padding:8px 10px; border:1px dashed rgba(255,255,255,.2); border-radius:12px; color:var(--muted);
+    background:linear-gradient(180deg, rgba(255,255,255,.03), transparent 40%);
+  }
+  .flow .node strong{ color:#fff }
+
+  .toast{
+    position:fixed; right:14px; bottom:14px; z-index:20; background:var(--card);
+    border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 12px; box-shadow:var(--shadow); display:none;
+  }
+
+  footer{
+    color:var(--muted); text-align:center; padding:40px 10px 80px;
+  }
+  .kbd{border:1px solid rgba(255,255,255,.2); padding:2px 6px; border-radius:6px; background:rgba(0,0,0,.15)}
+  .small{ font-size:13px; color:var(--muted) }
+
+  /* subtle entrance */
+  .card { opacity:0; transform: translateY(10px); animation: rise .5s ease forwards; }
+  .card:nth-child(1){ animation-delay:.05s } .card:nth-child(2){ animation-delay:.1s }
+  .card:nth-child(3){ animation-delay:.15s } .card:nth-child(4){ animation-delay:.2s }
+  @keyframes rise{ to{ opacity:1; transform:none } }
+
+  /* Print: white background for export */
+  @media print{
+    body{ background:#fff; color:#111 }
+    header{ position:static; backdrop-filter:none }
+    .sky{ display:none }
+    .chip, .section-tools, .toolbar .button, .toast{ display:none !important }
+    .grid{ grid-template-columns:1fr }
+    .card{ break-inside: avoid; box-shadow:none; border-color:#ddd; background:#fff }
+    details{ border:0 }
+    summary{ padding:8px 0 }
+    .content{ padding:0 0 12px 22px }
+  }
+</style>
+</head>
+<body>
+<div class="sky"><div class="stars"></div><div class="twinkles"></div></div>
+
+<header>
+  <div class="wrap">
+    <h1>Cooling the Furnace — Rights-First Policy Playbook</h1>
+    <div class="subtitle">Overreach → Backlash → Salvage → Drift. We break the loop with precise, accountable, reversible powers—and heavy investment in flourishing so hard tools fade over time.</div>
+    <div class="toolbar">
+      <div class="search" role="search">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.49L21.49 20zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5S14 7.01 14 9.5S11.99 14 9.5 14"/></svg>
+        <input id="q" placeholder="Filter by keyword (e.g., ‘sunset’, ‘redress’, ‘CBDC’, ‘SCIDA’)" />
+      </div>
+      <div class="chip" data-filter="all" aria-pressed="true" title="Show everything">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg> All
+      </div>
+      <div class="chip" data-filter="finance" aria-pressed="false" title="Finance (CBDC, de-banking, redress)">💸 Finance</div>
+      <div class="chip" data-filter="climate" aria-pressed="false" title="Climate (CBAM, offsets, integrity)">🌍 Climate</div>
+      <div class="chip" data-filter="ai" aria-pressed="false" title="AI (risk tiers, open models, assurance)">🤖 AI</div>
+      <div class="chip" data-filter="security" aria-pressed="false" title="Security (CSIS, SCIDA, no-fly)">🛡️ Security</div>
+      <a class="button ghost" id="toggleTheme" href="#" title="Toggle light/dark">🌓 Theme</a>
+      <a class="button" id="printBtn" href="#" title="Print / Save PDF">🖨️ Print</a>
+      <a class="button" id="exportAll" href="#" title="Export all amendment packs as .txt files">📦 Export All</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="grid" id="cards"></section>
+
+  <footer>
+    <p class="small">Design ethos: peace-first, sovereignty guard, zero harm. Tools should be <em>precise</em>, <em>accountable</em>, and <em>reversible</em>. Invest upstream so we need them less each year.</p>
+    <p class="small">Tips: use <span class="kbd">/</span> to focus search • press <span class="kbd">?</span> to see shortcuts • click “Export” inside any card to download a ready-to-file amendment pack.</p>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Copied to clipboard</div>
+
+<script>
+/* ---------- Data Model: long-form content + amendment packs ---------- */
+const PLAYBOOK = [
+  {
+    id:"finance",
+    icon:"💸",
+    title:"Finance — Programmable rails without programmable coercion",
+    lede:"Overreach normalizes always-on traceability (CBDCs, private compliance stacks). Backlash spikes with de-banking and opaque account closures. Salvage delays launches but keeps the scaffolding. Cool the furnace with due process, privacy-preserving compliance, and hard limits on transactional censorship.",
+    flow:["Overreach","Backlash","Salvage","Drift"],
+    longform: [
+`**Overreach.** Push toward programmable money and pervasive KYC/AML pressures an “always-on traceability” norm. Even absent a CBDC launch, pilots and rails create a de facto programmable perimeter governed by policy memos and private standards.`,
+`**Backlash.** High-profile de-banking incidents reveal wide discretionary power in private compliance stacks. People discover that essential services can be lost without clear reasons or fast appeal.`,
+`**Salvage.** Central banks say “no immediate CBDC,” but keep building. Regulators publish guidance, not guarantees. The furnace cools a little, then reignites with the next scandal.`,
+`**Trajectory risk.** Controls creep in through vendor contracts and “voluntary” verification layers. Without statute-level rights, private rails become public policy by proxy.`
+    ],
+    badges:[
+      {label:"Due Process", cls:"ok"},
+      {label:"Privacy", cls:"ok"},
+      {label:"Opacity Risk", cls:"warn"}
+    ],
+    amendments:[
+`1) **Statutory de-banking due-process.** Mandatory written reasons within 7 days; emergency holds require ex-parte judicial sign-off within 72h. Independent tribunal appeal with decision in ≤30 days. Restitution if closure deemed improper.`,
+`2) **CBDC pre-commitment guardrails.** Before any code ships: (a) transaction-level censorship banned outside court orders; (b) per-cap, time-bound emergency features with automatic **sunset**; (c) offline/pseudonymous small-value mode with risk-tiered AML.`,
+`3) **Transparency dashboards.** Publish aggregate stats quarterly: closures, SARs, false-positive remediation times, tribunal outcomes. Machine-readable, privacy-safe.`,
+`4) **Privacy-preserving compliance fund.** Public grants for zero-knowledge AML proofs, selective disclosure credentials, and wallet attestations that minimize personal data in motion.`,
+`5) **Vendor constraint clauses.** Any state contract for payments/compliance must include rights-preserving defaults (data minimization, purpose limitation, deletion SLAs).`
+    ]
+  },
+  {
+    id:"climate",
+    icon:"🌍",
+    title:"Climate — Integrity first: real tons, real justice",
+    lede:"Overreach leaned on offsets as a universal solvent while CBAM ramps border risk. Backlash over junk credits and inequitable burdens erodes trust. Salvage brings standards and phased tariffs, but legitimacy hinges on measured outcomes and shared gains.",
+    flow:["Overreach","Backlash","Salvage","Drift"],
+    longform:[
+`**Overreach.** Markets outran measurement. Offsets became the catch-all instrument, with methodologies too weak for durable climate truth. CBAM arrived as a blunt fix for leakage risks.`,
+`**Backlash.** Investigations expose low-integrity credits; firms and funds recoil. Exporters decry protectionism disguised as climate policy.`,
+`**Salvage.** Integrity councils issue “core carbon principles.” CBAM rolls in phases with transitional reporting, but trust is fragile.`,
+`**Trajectory risk.** If credits remain sloppy or CBAM revenues feel extractive, the furnace re-ignites and harsher, less nuanced tools take hold.`
+    ],
+    badges:[
+      {label:"Integrity", cls:"ok"},
+      {label:"Trade Friction", cls:"warn"},
+      {label:"Justice", cls:"ok"}
+    ],
+    amendments:[
+`1) **Ex-post crediting only.** Offset eligibility limited to ex-post, instrumented removals/avoidance with open methods, counterfactuals, and permanence buffers. Public registries mirrored to append-only logs (hash transparency).`,
+`2) **CBAM with justice.** Hypothecate a fixed share of CBAM revenue to (a) decarbonize affected exporters, (b) least-developed suppliers, and (c) just-transition funds for workers.`,
+`3) **Co-benefit accounting.** Require local air-quality, biodiversity, and livelihoods metrics (“peace cascades”) alongside CO₂e, published in a unified scorecard.`,
+`4) **Claims code in law.** Marketing claims must map to integrity tiers with standardized labels; penalties for over-claiming or double counting.`,
+`5) **Community consent & grievance.** Projects must document free, prior, and informed consent (FPIC) and provide a binding community grievance channel with time-bound remedies.`
+    ]
+  },
+  {
+    id:"ai",
+    icon:"🤖",
+    title:"AI — Regulate use risks, not curiosity",
+    lede:"Overreach targets model identity and compute gates rather than deployed harms. Backlash warns of lock-in and chilled research. Salvage offers risk-management frameworks, but obligations still creep. Cool the furnace with context-first duties of care, open assurance, and rights-preserving safety.",
+    flow:["Overreach","Backlash","Salvage","Drift"],
+    longform:[
+`**Overreach.** One-size rules for “foundation models” risk enshrining incumbents and pushing innovation underground. Compute gating tempts dragnet surveillance.`,
+`**Backlash.** Open communities and SMEs push for testable, context-specific obligations tied to real hazards, not brand names.`,
+`**Salvage.** Voluntary risk frameworks (assurance profiles, incident taxonomies) emerge, but lack statutory teeth or clarity in procurement.`,
+`**Trajectory risk.** If we regulate *who* built it instead of *what it does*, we entrench oligopolies and offload harms to users without remedies.`
+    ],
+    badges:[
+      {label:"Assurance", cls:"ok"},
+      {label:"Openness", cls:"ok"},
+      {label:"Overbreadth Risk", cls:"warn"}
+    ],
+    amendments:[
+`1) **Context-first duty of care.** Legal obligations triggered by *deployed use-case risk levels* (e.g., biometric ID, credit decisions, medical triage). Require documented hazard analyses, mitigations, and post-deployment monitoring.`,
+`2) **Assurance commons.** Public red-team labs and testbeds; mandatory publication of evaluation summaries and incident reports for high-risk deployments; safe harbor for coordinated vulnerability disclosure.`,
+`3) **Rights-preserving safety.** Ban biometric mass identification in public spaces; require meaningful appeal for automated decisions; logging for audits with strict minimization and rotation.`,
+`4) **Public compute & open weights.** Fund state-of-the-art open models with governance boards (civil society, academia, SMEs) to avoid gatekeeper lock-in.`,
+`5) **Procurement as lever.** Government contracts must adopt open evaluation suites, export model cards, and measurable KPIs tied to harm reduction, not vanity metrics.`
+    ]
+  },
+  {
+    id:"security",
+    icon:"🛡️",
+    title:"Security — Precise, reviewable, reversible",
+    lede:"C-51 lit the fire; C-59 pruned branches but kept deep levers (datasets, broad sharing categories, active ops). Cool the furnace with hard Charter guardrails, tightened sharing triggers, independent redress, and real sunsets.",
+    flow:["Overreach","Backlash","Salvage","Drift"],
+    longform:[
+`**Overreach.** Broad info sharing and threat-reduction blurred intel and policing. Dataset regimes invite mission creep if necessity isn’t enforced.`,
+`**Backlash.** Privacy commissioners, courts, civil society flagged proportionality gaps, false positives (e.g., no-fly kids), and chilling effects on dissent.`,
+`**Salvage.** Oversight bodies and speech-offence narrowing helped, but architecture remains sticky.`,
+`**Trajectory risk.** Secret warrants and MOUs can re-expand powers without public debate unless we impose sunsets and radical transparency.`
+    ],
+    badges:[
+      {label:"Charter Guard", cls:"ok"},
+      {label:"Transparency", cls:"ok"},
+      {label:"Scope Creep", cls:"warn"}
+    ],
+    amendments:[
+`1) **No Charter-breach warrants.** Threat-reduction powers cannot authorize actions contrary to Charter rights. Exhaustive, positive list of permitted measures only.`,
+`2) **SCIDA narrowed.** Sharing limited to direct, demonstrable threats of violence; strict purpose limitation, minimization, and deletion SLAs; annual public stats by category.`,
+`3) **Dataset discipline.** Collect only what is necessary; independent technical audits of queries; periodic deletion by default unless re-justified.`,
+`4) **No-Fly due process.** Notice where feasible; independent tribunal; child-match exception handling; binding timelines for correction/removal.`,
+`5) **Sunset + renewal.** Exceptional powers auto-lapse every 3 years unless re-enacted after public hearings and publication of usage metrics.`
+    ]
+  }
+];
+
+/* ---------- Render Cards ---------- */
+const cardsEl = document.getElementById('cards');
+
+function render(){
+  cardsEl.innerHTML = '';
+  const q = (document.getElementById('q').value || '').toLowerCase().trim();
+  const active = document.querySelector('.chip[aria-pressed="true"]')?.dataset.filter || 'all';
+
+  PLAYBOOK.forEach((p, idx) => {
+    const hay = [p.title, p.lede, ...p.longform, ...(p.amendments||[])].join(' ').toLowerCase();
+    const matchQ = !q || hay.includes(q);
+    const matchTag = active==='all' || active===p.id;
+    if(!(matchQ && matchTag)) return;
+
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.style.animationDelay = `${.05*idx}s`;
+
+    card.innerHTML = `
+      <header class="card-head">
+        <span class="pill">${p.icon} ${p.id.toUpperCase()}</span>
+        <div class="title">${p.title}</div>
+        <p class="lede">${p.lede}</p>
+      </header>
+
+      <div class="flow" aria-label="Cycle">
+        ${p.flow.map((f,i)=>{
+          const tone = i===0?'bad': i===1?'warn': i===2?'ok':'warn';
+          return `<div class="node"><strong>${f}</strong></div>`;
+        }).join('')}
+      </div>
+
+      <details open>
+        <summary><svg class="caret" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="m10 17l5-5l-5-5v10Z"/></svg> Long-form analysis</summary>
+        <div class="content">
+          ${p.longform.map(par=>`<p>${par}</p>`).join('')}
+        </div>
+      </details>
+
+      <details>
+        <summary><svg class="caret" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="m10 17l5-5l-5-5v10Z"/></svg> Amendment package (ready to file)</summary>
+        <div class="content">
+          <ol>
+            ${p.amendments.map(a=>`<li style="margin-bottom:10px">${a}</li>`).join('')}
+          </ol>
+        </div>
+      </details>
+
+      <div class="section-tools">
+        <button data-action="copy" data-id="${p.id}">📋 Copy Pack</button>
+        <button data-action="download" data-id="${p.id}">💾 Export .txt</button>
+        <button class="ghost" data-action="collapse" data-id="${p.id}">🗂️ Collapse / Expand</button>
+      </div>
+    `;
+    cardsEl.appendChild(card);
+  });
+}
+render();
+
+/* ---------- Interactions ---------- */
+const toast = document.getElementById('toast');
+function showToast(msg='Copied'){
+  toast.textContent = msg;
+  toast.style.display='block';
+  clearTimeout(showToast.__t);
+  showToast.__t = setTimeout(()=>toast.style.display='none', 1600);
+}
+
+document.addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip');
+  if(chip){
+    document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+    chip.setAttribute('aria-pressed','true');
+    render(); return;
+  }
+  const btn = e.target.closest('button, .button');
+  if(!btn) return;
+
+  if(btn.id==='printBtn'){ window.print(); return; }
+  if(btn.id==='exportAll'){ exportAll(); return; }
+  if(btn.id==='toggleTheme'){ toggleTheme(); return; }
+
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+  if(!action || !id) return;
+  const pack = PLAYBOOK.find(x=>x.id===id);
+
+  if(action==='copy'){
+    const text = packToText(pack);
+    navigator.clipboard.writeText(text).then(()=>showToast('Amendment pack copied'));
+  }
+  if(action==='download'){
+    const blob = new Blob([packToText(pack)], {type:'text/plain'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `${id}-amendment-pack.txt`; a.click(); URL.revokeObjectURL(a.href);
+  }
+  if(action==='collapse'){
+    const card = btn.closest('.card');
+    card.querySelectorAll('details').forEach(d => d.open = !d.open);
+  }
+});
+
+function packToText(p){
+  return `${p.title}\n\n${p.lede}\n\nLong-form:\n${p.longform.map(x=>'- '+x.replace(/\*\*/g,'')).join('\n')}\n\nAmendments:\n${p.amendments.map((x,i)=>`${i+1}. ${x.replace(/\*\*/g,'')}`).join('\n')}\n`;
+}
+
+function exportAll(){
+  PLAYBOOK.forEach(p=>{
+    const blob = new Blob([packToText(p)], {type:'text/plain'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `${p.id}-amendment-pack.txt`; a.click(); URL.revokeObjectURL(a.href);
+  });
+  showToast('Exported all packs');
+}
+
+/* Search box + shortcuts */
+const q = document.getElementById('q');
+q.addEventListener('input', render);
+document.addEventListener('keydown', (ev)=>{
+  if(ev.key==='/' && document.activeElement!==q){ ev.preventDefault(); q.focus(); }
+  if(ev.key==='?'){ ev.preventDefault(); alert('Shortcuts:\n• / focus search\n• ? this help\n• Print to export PDF\n• “Copy Pack” copies a ready-to-file amendment set'); }
+});
+
+/* Theme toggle (persisted) */
+function setTheme(mode){
+  document.documentElement.dataset.theme = mode;
+  if(mode==='light'){
+    document.documentElement.style.colorScheme = 'light';
+  } else {
+    document.documentElement.style.colorScheme = 'dark';
+  }
+  localStorage.setItem('theme', mode);
+}
+function toggleTheme(){
+  const cur = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+  setTheme(cur==='light'?'dark':'light');
+}
+setTheme(localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'));
+
+/* Subtle quality-of-life: focus ring on keyboard nav */
+let mouseDown = false;
+document.addEventListener('mousedown', ()=> mouseDown = true);
+document.addEventListener('keydown', ()=> mouseDown = false);
+document.addEventListener('focusin', (e)=>{
+  if(mouseDown) return;
+  const el = e.target;
+  if(['A','BUTTON','INPUT','SUMMARY'].includes(el.tagName)){
+    el.style.outline = `2px solid var(--brand-2)`; el.style.outlineOffset = '2px';
+  }
+});
+document.addEventListener('focusout', (e)=>{ e.target.style.outline = 'none'; });
+
+/* Service Worker for offline caching */
+if('serviceWorker' in navigator){
+  const swCode = `
+self.addEventListener('install', e=>{
+  e.waitUntil((async()=>{
+    const c = await caches.open('furnace-v1');
+    await c.addAll(['./']); // cache the shell (this file)
+  })());
+  self.skipWaiting();
+});
+self.addEventListener('activate', e=> { e.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', e=>{
+  const url = new URL(e.request.url);
+  // Network-first for same-origin HTML, cache-first for others
+  if(e.request.mode==='navigate'){
+    e.respondWith(fetch(e.request).catch(()=>caches.match('./')));
+    return;
+  }
+  e.respondWith((async()=>{
+    const cache = await caches.open('furnace-v1');
+    const cached = await cache.match(e.request);
+    if(cached) return cached;
+    try{
+      const res = await fetch(e.request);
+      if(url.origin===location.origin && res.ok) cache.put(e.request, res.clone());
+      return res;
+    }catch(err){
+      return cached || Response.error();
+    }
+  })());
+});`;
+  const blob = new Blob([swCode], {type:'text/javascript'});
+  const swURL = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swURL).catch(()=>{});
+}
+
+/* Initial keyboard focus hint */
+setTimeout(()=>{ if(!q.value) q.placeholder = "Try: sunset • redress • CBDC • SCIDA"; }, 800);
+</script>
+
+</body>
+</html>

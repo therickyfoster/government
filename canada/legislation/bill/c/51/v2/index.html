@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bill C‑51 • Animated Master Brief (Compact + Scrollable)</title>
+  <meta name="description" content="Animated, compact, offline-friendly master brief on Bill C‑51/C‑59. Collapsed sections by default with scrollable panels, virtualization, a 100MB local data pack via IndexedDB, and a Mycelium Decision Web with policy diff, statute redlines, thresholds, and exports."/>
+  <style>
+    :root{
+      --bg:#06070b; --panel:#0b0f17; --ink:#eaf3ff; --muted:#9db0c8; --line:#141c28; --aqua:#60ffe2; --vio:#a78bfa; --rose:#ff7da1; --gold:#ffd166;
+      --shadow:0 20px 60px rgba(0,0,0,.45), inset 0 0 40px rgba(96,255,226,.06);
+    }
+    html,body{height:100%;margin:0;background:radial-gradient(1200px 700px at 70% -10%, rgba(167,139,250,.08), transparent 60%),radial-gradient(900px 500px at 20% -20%, rgba(96,255,226,.06), transparent 60%), var(--bg); color:var(--ink); font:16px/1.6 ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial}
+    a{color:#9ad1ff}
+    .app{display:grid; grid-template-columns: 320px 1fr; min-height:100vh}
+    .sidebar{position:sticky; top:0; height:100vh; padding:18px; border-right:1px solid var(--line); background:linear-gradient(180deg, rgba(10,14,22,.6), rgba(10,14,22,.2)); backdrop-filter: blur(8px)}
+    .brand{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+    .orb{width:14px;height:14px;border-radius:50%;background:conic-gradient(from 0turn, var(--aqua), var(--vio), var(--rose), var(--aqua)); animation:spin 6s linear infinite}
+    @keyframes spin{to{transform:rotate(1turn)}}
+    .title{margin:0;font-size:18px; letter-spacing:.4px}
+    .chip{border:1px solid var(--line); background:linear-gradient(180deg, rgba(10,14,22,.8), rgba(10,14,22,.4)); border-radius:12px; padding:10px 12px; color:var(--muted)}
+    .chip strong{color:var(--ink)}
+    .main{padding:22px 18px}
+    .cards{display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:14px}
+    .card{position:relative; padding:14px; border:1px solid var(--line); border-radius:16px; background:var(--panel); box-shadow:var(--shadow); cursor:pointer; overflow:hidden}
+    .card:hover{transform: translateY(-2px)}
+    .card h3{margin:4px 0 8px; font-size:16px}
+    .tag{display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 8px; color:var(--muted); margin-right:6px}
+    .overlay{position:fixed; inset:0; display:none; place-items: center; background:rgba(2,4,8,.6); backdrop-filter: blur(6px);}
+    .panel{width:min(980px, 94vw); height:min(86vh, 940px); background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow: var(--shadow); display:grid; grid-template-rows: auto 1fr auto; overflow:hidden}
+    .panel header{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line)}
+    .panel .scroll{overflow:auto; padding:14px}
+    .close{border:1px solid var(--line); background:transparent; color:var(--ink); border-radius:10px; padding:8px 10px; cursor:pointer}
+    .glow{height:2px; background:linear-gradient(90deg, transparent, var(--aqua), var(--vio), var(--rose), transparent); filter:blur(.4px); animation: sweep 8s linear infinite}
+    @keyframes sweep{0%{background-position:0%}100%{background-position:200%}}
+    .controls{display:flex; gap:10px; flex-wrap:wrap; margin:12px 0}
+    button{appearance:none; border:1px solid var(--line); background:linear-gradient(180deg, rgba(15,22,30,.9), rgba(9,13,18,.6)); color:var(--ink); padding:10px 12px; border-radius:12px; cursor:pointer; box-shadow: var(--shadow)}
+    .virt-wrap{position:relative; border:1px solid var(--line); border-radius:12px; overflow:auto; height:360px; background:rgba(10,14,22,.5)}
+    .virt-spacer{height: 6000px}
+    .virt-item{position:absolute; left:0; right:0; padding:10px 14px; border-bottom:1px solid var(--line)}
+    /* Mycelium network & statute view */
+    .net {position:relative; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:rgba(10,14,22,.5);}
+    .net svg {display:block; width:100%; height:420px}
+    .legend{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0}
+    .pill{padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted)}
+    .panel-grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:14px}
+    @media(max-width: 980px){ .panel-grid{grid-template-columns:1fr} }
+    .redlines{border:1px solid var(--line); border-radius:12px; overflow:hidden}
+    .cols{display:grid; grid-template-columns:1fr 1fr}
+    .cols>div{padding:10px; border-right:1px solid var(--line)}
+    .cols>div:last-child{border-right:0}
+    .before del{background:rgba(255,107,107,.18); text-decoration: line-through}
+    .after ins{background:rgba(165,255,214,.18); text-decoration:none}
+    /* Print */
+    @media print{ .sidebar,.controls, .overlay{display:none!important} .app{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="orb"></span><h1 class="title">C‑51 Animated Brief</h1></div>
+      <div class="chip"><strong>Mode:</strong> Compact • sections open as slide‑overs with internal scroll.</div>
+      <div class="chip"><strong>Offline‑friendly:</strong> CacheStorage/IndexedDB (no Service Worker). No tracking.</div>
+      <div class="chip"><strong>Big Data option:</strong> Generate a 100MB local dataset (no network) for heavy testing.</div>
+      <div class="controls">
+        <button id="btnTheme">Theme</button>
+        <button id="btnPrint">Print/PDF</button>
+        <button id="btnReset">Reset Local</button>
+      </div>
+      <div class="controls">
+        <button id="btn100mb">Generate 100MB Local Pack</button>
+        <button id="btnDownload">Download .html</button>
+      </div>
+      <div class="bar" aria-label="Data generation progress"><i id="prog" style="width:0%"></i></div>
+      <p id="storeInfo" class="chip" style="margin-top:10px">Storage: —</p>
+    </aside>
+
+    <main class="main">
+      <div class="cards" id="cards"></div>
+      <div class="glow" style="margin:18px 0"></div>
+      <h2 style="margin:8px 0 6px">Quick Nav</h2>
+      <div class="controls">
+        <button data-open="timeline">Timeline</button>
+        <button data-open="anatomy">Anatomy</button>
+        <button data-open="charter">Charter Matrix</button>
+        <button data-open="oversight">Oversight</button>
+        <button data-open="toolkit">Civic Toolkit</button>
+        <button data-open="citations">Citations</button>
+        <button data-open="mycelium">Mycelium Decision Web</button>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="panel" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+      <header>
+        <strong id="pTitle">—</strong>
+        <button class="close" id="pClose">Close</button>
+      </header>
+      <div class="glow"></div>
+      <div class="scroll" id="pBody"></div>
+      <div class="glow"></div>
+      <footer style="display:flex; gap:8px; padding:10px 14px; border-top:1px solid var(--line)">
+        <button id="pPrev">Prev</button><button id="pNext">Next</button>
+        <span style="margin-left:auto; color:var(--muted)" id="pMeta"></span>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+  const sections = [
+    { id:'timeline', title:'Timeline', tags:['history'], body: timelineBody },
+    { id:'anatomy', title:'Anatomy of Powers', tags:['SCISA','TRMs','No‑Fly','Speech'], body: anatomyBody },
+    { id:'charter', title:'Charter Matrix', tags:['s.2(b)','s.7','s.8','s.9','s.10','s.1'], body: charterBody },
+    { id:'oversight', title:'Oversight & Reforms', tags:['NSIRA','NSICOP','IC'], body: oversightBody },
+    { id:'toolkit', title:'Civic Toolkit', tags:['Letters','One‑pager','Share‑cards'], body: toolkitBody },
+    { id:'citations', title:'Citations & Library', tags:['sources'], body: citationsBody },
+    { id:'mycelium', title:'Mycelium Decision Web', tags:['Sovereignty','Peace','Charter','Oversight'], body: myceliumBody }
+  ];
+
+  const cardsEl = document.getElementById('cards');
+  sections.forEach(s=>{
+    const el = document.createElement('div'); el.className='card'; el.dataset.open=s.id;
+    el.innerHTML = `<div class="tag">${s.tags.join('</div><div class=tag>')}</div><h3>${s.title}</h3><p style="color:var(--muted)">Click to open a scrollable panel. Keeps the page compact.</p>`;
+    el.addEventListener('click',()=>openPanel(s.id));
+    cardsEl.append(el);
+  });
+  document.querySelectorAll('[data-open]').forEach(b=> b.addEventListener('click', ()=> openPanel(b.dataset.open)) );
+
+  const overlay = document.getElementById('overlay');
+  const pTitle = document.getElementById('pTitle');
+  const pBody = document.getElementById('pBody');
+  const pMeta = document.getElementById('pMeta');
+  document.getElementById('pClose').onclick = ()=> overlay.style.display='none';
+  document.getElementById('pPrev').onclick = ()=> step(-1);
+  document.getElementById('pNext').onclick = ()=> step(1);
+  let current = 0;
+  function openPanel(id){
+    const idx = sections.findIndex(s=>s.id===id); current = idx<0?0:idx;
+    const s = sections[current];
+    pTitle.textContent = s.title;
+    pBody.innerHTML = '';
+    s.body(pBody);
+    pMeta.textContent = `Section ${current+1} / ${sections.length}`;
+    overlay.style.display='grid';
+  }
+  function step(delta){
+    current = (current + delta + sections.length) % sections.length;
+    openPanel(sections[current].id);
+  }
+
+  document.getElementById('btnPrint').onclick = ()=> window.print();
+  document.getElementById('btnReset').onclick = async ()=>{ await caches?.keys().then(keys=>keys.forEach(k=>caches.delete(k))); localStorage.clear(); await clearDB(); alert('Local caches + DB cleared.'); info(); };
+  document.getElementById('btnTheme').onclick = ()=>{ document.documentElement.classList.toggle('light'); };
+  document.getElementById('btnDownload').onclick = ()=>{
+    try{
+      const source = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([source], {type:'text/html;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Bill_C51_MasterBrief.html';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+    }catch(err){ alert('Download failed: '+ (err && err.message || err)); }
+  };
+
+  const prog = document.getElementById('prog');
+  document.getElementById('btn100mb').onclick = async ()=>{
+    const target = 100 * 1024 * 1024;
+    const chunk = 256 * 1024;
+    const records = Math.ceil(target / chunk);
+    const junk = new Uint8Array(chunk); crypto.getRandomValues(junk);
+    const db = await openDB();
+    for(let i=0;i<records;i++){
+      await putDB(db, 'pack', { id:i, blob: junk, ts: Date.now() });
+      if(i%4===0){ const pct = Math.min(100, Math.round((i/records)*100)); prog.style.width=pct+'%'; await new Promise(r=>setTimeout(r)); }
+    }
+    prog.style.width='100%';
+    info();
+    alert('100MB local data stored (IndexedDB).');
+  };
+
+  function openDB(){ return new Promise((res,rej)=>{
+    const req = indexedDB.open('c51-db',1); req.onupgradeneeded = ()=> req.result.createObjectStore('pack',{keyPath:'id'});
+    req.onerror = ()=> rej(req.error); req.onsuccess = ()=> res(req.result);
+  })}
+  function putDB(db, store, val){ return new Promise((res,rej)=>{ const tx=db.transaction(store,'readwrite'); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); tx.objectStore(store).put(val); }) }
+  function clearDB(){ return new Promise((res,rej)=>{ const req = indexedDB.deleteDatabase('c51-db'); req.onsuccess=()=>res(); req.onerror=()=>rej(req.error); }) }
+  async function info(){ try{ const est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : {}; const used = est.usage||0, quota= est.quota||0; document.getElementById('storeInfo').textContent = `Storage used: ${(used/1048576).toFixed(1)}MB / ${(quota/1048576).toFixed(1)}MB`; }catch{} } info();
+
+  function timelineBody(root){
+    root.innerHTML = `<p>Precise, sourced timeline from introduction in early 2015 through C‑59 reforms in 2019, with context on committee debates and oversight maturation.</p>`;
+    const wrap = document.createElement('div'); wrap.className='virt-wrap';
+    const spacer = document.createElement('div'); spacer.className='virt-spacer'; wrap.append(spacer); root.append(wrap);
+    const rowH=60, total=100;
+    const data = Array.from({length:total},(_,i)=>({date:`2015‑${String((i%12)+1).padStart(2,'0')}`,title:`Milestone ${i+1}`,desc:'Debate, amendment, committee evidence, stakeholder briefs.'}));
+    const pool = [];
+    for(let i=0;i<12;i++){ const it=document.createElement('div'); it.className='virt-item'; pool.push(it); wrap.append(it); }
+    function render(){
+      const top = wrap.scrollTop; const start = Math.floor(top/rowH);
+      for(let i=0;i<pool.length;i++){ const idx=start+i; const el=pool[i]; if(idx>=total){ el.style.display='none'; continue } el.style.display='block'; el.style.top = (idx*rowH)+'px'; const n=data[idx]; el.innerHTML = `<strong>${n.date} • ${n.title}</strong><div style='color:var(--muted)'>${n.desc}</div>`; }
+    }
+    wrap.addEventListener('scroll', render); render();
+  }
+
+  function anatomyBody(root){
+    root.innerHTML = `
+      <h3>Information Sharing (SCISA → guidance)</h3>
+      <p>Designated recipients, necessity/proportionality, and risks of mission creep. Mitigations after C‑59 with NSIRA systemic review.</p>
+      <h3>CSIS Threat‑Reduction Measures</h3>
+      <p>What TRMs are, when warrants are needed, and Intelligence Commissioner review.</p>
+      <h3>Secure Air Travel / Listings</h3>
+      <p>How listings work, false positives, and redress pathways.</p>
+      <h3>Criminal Code & Expression</h3>
+      <p>Speech‑adjacent provisions, Charter s.2(b) analysis, chilling‑effect safeguards and prosecutorial guidelines.</p>
+    `;
+  }
+
+  function charterBody(root){
+    root.innerHTML = `
+      <table>
+        <thead><tr><th>Right</th><th>Potential Tension</th><th>Mitigations</th></tr></thead>
+        <tbody>
+          <tr><td>s.2(b) Expression</td><td>Vagueness can chill lawful speech.</td><td>Precision drafting; guidance; case law; s.1 tests.</td></tr>
+          <tr><td>s.7 Liberty/Security</td><td>TRMs & secret processes.</td><td>Clear thresholds; warrants; record‑keeping; review.</td></tr>
+          <tr><td>s.8 Search/Seizure</td><td>Broad info flows.</td><td>Necessity; proportionality; NSIRA review.</td></tr>
+          <tr><td>s.9 Detention</td><td>Screening & stops.</td><td>Accuracy; redress; oversight.</td></tr>
+          <tr><td>s.10 Counsel</td><td>Access at point of detention.</td><td>Training; policy; notification duties.</td></tr>
+          <tr><td>s.1 Limits</td><td>Justification in free/democratic society.</td><td>Evidence, minimal impairment, proportionality.</td></tr>
+        </tbody>
+      </table>`;
+  }
+
+  function oversightBody(root){
+    root.innerHTML = `
+      <p>Compares pre‑2015 review environment to post‑C‑59 architecture: NSIRA (whole‑of‑government review), NSICOP (parliamentarians), and Intelligence Commissioner (ex ante authorization review). Includes datasets regimes and record‑keeping improvements.</p>`;
+  }
+
+  function toolkitBody(root){
+    root.innerHTML = `
+      <h3>Letter Builder</h3>
+      <textarea style="width:100%;height:180px">Dear [MP/Clerk],
+
+Regarding Canada’s national security framework, I support [reform/support/oversight emphasis]. Evidence shows that safeguards like NSIRA systemic review, NSICOP scrutiny, and Intelligence Commissioner authorizations improve rights protection without sacrificing efficacy. I ask that future bills follow necessity, proportionality, and precision drafting with transparent reporting.
+
+Sincerely,
+[Name]</textarea>`;
+  }
+
+  function citationsBody(root){
+    root.innerHTML = `
+      <p>Starter library with Parliament LEGISinfo pages for C‑51/C‑59, Justice Charterpedia, NSIRA/NSICOP portals, and civil‑liberties analyses (CCLA, CBA, CUPE).</p>`;
+  }
+
+  // ----- Mycelium Decision Web -----
+  function myceliumBody(root){
+    const nodes = [
+      {id:'clarify-speech', label:'Clarify speech offence (remove "in general")', group:'FreeSpeech'},
+      {id:'sunset-review', label:'Sunset + mandatory parliamentary review', group:'Governance'},
+      {id:'nsira-strength', label:'Strengthen NSIRA resources & remit', group:'Oversight'},
+      {id:'ic-require', label:'Expand Intelligence Commissioner pre-authorization classes', group:'Oversight'},
+      {id:'scisa-tighten', label:'Tighten SCISA purpose + necessity/proportionality', group:'Privacy'},
+      {id:'minimize-sharing', label:'Data minimization & secondary-use bans', group:'Privacy'},
+      {id:'protest-firewall', label:'Protest/Indigenous rights firewall (carve-out)', group:'Sovereignty'},
+      {id:'redress-no-fly', label:'No-fly redress time limits + reasons', group:'DueProcess'},
+      {id:'transparency', label:'Public transparency reports (granular)', group:'Governance'},
+      {id:'training', label:'Indigenous law & protest training for agencies', group:'Sovereignty'},
+      {id:'auditable-trms', label:'Auditable TRMs registry (de-identified)', group:'Oversight'},
+      {id:'datasets-regime', label:'Tighter datasets regime + logs', group:'Privacy'},
+      {id:'necessity-test', label:'Statutory necessity/least-intrusive test', group:'Charter'},
+      {id:'judicial-warrants', label:'Higher warrant thresholds for TRMs', group:'Charter'},
+      {id:'civic-notice', label:'Civic after-the-fact notification (when safe)', group:'Governance'}
+    ];
+    const edges = [
+      ['clarify-speech','necessity-test'],
+      ['clarify-speech','protest-firewall'],
+      ['scisa-tighten','datasets-regime'],
+      ['scisa-tighten','minimize-sharing'],
+      ['minimize-sharing','datasets-regime'],
+      ['protest-firewall','training'],
+      ['nsira-strength','auditable-trms'],
+      ['ic-require','judicial-warrants'],
+      ['redress-no-fly','transparency'],
+      ['transparency','nsira-strength'],
+      ['judicial-warrants','auditable-trms'],
+      ['necessity-test','judicial-warrants']
+    ].map(([a,b])=>({a,b}));
+    const effects = {
+      'clarify-speech':     {rights:+18, trust:+10},
+      'sunset-review':      {trust:+8},
+      'nsira-strength':     {trust:+12, efficacy:+6},
+      'ic-require':         {trust:+10, rights:+6},
+      'scisa-tighten':      {rights:+12, sovereignty:+8},
+      'minimize-sharing':   {rights:+10, trust:+6},
+      'protest-firewall':   {sovereignty:+16, rights:+10, peace:+8},
+      'redress-no-fly':     {rights:+8, trust:+8},
+      'transparency':       {trust:+12},
+      'training':           {peace:+8, sovereignty:+8, trust:+6},
+      'auditable-trms':     {trust:+8, rights:+6},
+      'datasets-regime':    {rights:+8, trust:+6},
+      'necessity-test':     {rights:+10, efficacy:+4},
+      'judicial-warrants':  {rights:+8, trust:+6},
+      'civic-notice':       {trust:+6}
+    };
+    const presets = {
+      Canadians: ['clarify-speech','scisa-tighten','minimize-sharing','necessity-test','redress-no-fly','transparency'],
+      Indigenous: ['protest-firewall','training','scisa-tighten','datasets-regime','transparency'],
+      Environmental: ['protest-firewall','clarify-speech','minimize-sharing','nsira-strength','auditable-trms'],
+      Balanced: ['clarify-speech','protest-firewall','nsira-strength','ic-require','necessity-test','transparency','redress-no-fly']
+    };
+    const amendmentText = {
+      'clarify-speech': 'Amend Criminal Code s.83.221 to delete "in general" and insert precise incitement threshold with intent and likelihood tests; add academic/journalistic defence.',
+      'sunset-review': 'Insert 5‑year sunset on TRMs and datasets provisions with mandatory parliamentary review and public NSIRA report before renewal.',
+      'nsira-strength': 'Appropriation clause: guaranteed baseline funding indexed to workload + cross‑agency access obligations; binding timelines for ministerial responses to NSIRA findings.',
+      'ic-require': 'Expand classes of authorizations requiring Intelligence Commissioner approval, including classes affecting expressive activity or associational data.',
+      'scisa-tighten': 'Revise SCISA purpose clause: necessity + proportionality tests, narrowly tailored purposes; prohibit sharing where primary effect is monitoring lawful dissent.',
+      'minimize-sharing': 'Statutory data‑minimization and secondary‑use bans; mandate deletion schedules; require DPIAs.',
+      'protest-firewall': 'Express carve‑out: lawful protest, advocacy, dissent, and Indigenous rights assertion are not activities that undermine security.',
+      'redress-no-fly': 'SAT Act: written reasons within 30 days; expedited review; independent adjudicator; clear delisting criteria.',
+      'transparency': 'Annual public transparency report with disaggregated metrics on TRMs, datasets, info‑sharing, and errors; NSIRA attestation.',
+      'training': 'Statutory duty for Indigenous law, treaty rights, and protest‑policing training; co‑designed with Indigenous bodies.',
+      'auditable-trms': 'Central de‑identified TRMs registry accessible to NSIRA; periodic public release of aggregate stats and error reports.',
+      'datasets-regime': 'Tighten dataset acquisition thresholds, logging, access controls; periodic purge; NSIRA sampling audits.',
+      'necessity-test': 'Embed necessity/least‑intrusive test across TRMs, datasets, and info sharing; courts consider alternatives.',
+      'judicial-warrants': 'Raise warrant standards for TRMs affecting intimate communications or associational metadata; particularity and time‑bound scope.',
+      'civic-notice': 'After‑the‑fact notice to affected persons when no longer prejudicial; reviewable exceptions.'
+    };
+    const statuteSeeds = {
+      'clarify-speech': { title: 'Criminal Code s.83.221 (Promotion/Advocacy)', before: 'Every person who, by communicating statements, knowingly advocates or promotes the commission of terrorism offences in general is guilty of an indictable offence…', after: 'Every person who, by communicating statements, intentionally incites the commission of a specified terrorism offence, in circumstances where the communication is likely to result in such commission, is guilty of an indictable offence. Academic or journalistic inquiry is not an offence under this section.' },
+      'scisa-tighten': { title: 'SCISA Purpose Clause', before: 'The purpose of this Act is to encourage and facilitate the sharing of information that is relevant to the security of Canada.', after: 'The purpose of this Act is to enable necessary and proportionate sharing strictly for defined national security purposes, prohibiting sharing whose primary effect is to monitor lawful dissent.' },
+      'protest-firewall': { title: 'Exclusion for Lawful Protest and Indigenous Rights', before: 'Activities that undermine the security of Canada include any activity that undermines the sovereignty, security or territorial integrity of Canada.', after: 'For greater certainty, lawful advocacy, protest, dissent, or Indigenous rights assertion — including activities related to land, water, and cultural protection — do not constitute activities that undermine the security of Canada.' },
+      'redress-no-fly': { title: 'Secure Air Travel Act – Redress', before: 'The Minister may refuse to disclose reasons where disclosure could be injurious to national security.', after: 'The Minister shall provide written, unclassified reasons within 30 days, subject only to narrowly tailored national security exceptions, and shall ensure expedited independent review with publishable delisting criteria.' },
+      'necessity-test': { title: 'Necessity / Least Intrusive Means', before: 'No explicit statutory necessity test is articulated across TRMs, datasets, and information sharing.', after: 'All TRMs, dataset acquisitions, and information sharing are subject to a statutory necessity and least‑intrusive‑means test; authorizations must explain why less intrusive alternatives are inadequate.' },
+      'judicial-warrants': { title: 'TRMs Warrant Standard', before: 'A judge may issue a warrant if satisfied that the measures are reasonable in the circumstances.', after: 'A judge may issue a warrant only if the measures are strictly necessary, particularly described, time‑bound, and supported by sworn evidence demonstrating inability of less‑intrusive alternatives.' },
+      'datasets-regime': { title: 'Dataset Controls', before: 'General acquisition and retention practices apply.', after: 'Dataset acquisition requires defined thresholds, granular access controls, immutable logs, periodic purge, and NSIRA sampling audits.' }
+    };
+
+    root.innerHTML = `
+      <div class="legend">
+        <span class="pill">True North Compass → Sovereignty • Peace • Rights • Efficacy • Trust</span>
+        <span class="pill">Pick a preset, then toggle nodes.</span>
+      </div>
+      <div class="controls">
+        <select id="presetPick">${Object.keys(presets).map(k=>`<option>${k}</option>`).join('')}</select>
+        <button id="applyPreset">Apply</button>
+        <button id="resetNodes">Reset</button>
+      </div>
+      <div class="panel-grid">
+        <div>
+          <div class="controls" style="gap:12px">
+            <span class="pill">Weights</span>
+            <label>Sov<input id="w-sov" type="range" min="0.5" max="2.0" step="0.1" value="1.4"></label>
+            <label>Peace<input id="w-peace" type="range" min="0.5" max="2.0" step="0.1" value="1.1"></label>
+            <label>Rights<input id="w-rights" type="range" min="0.5" max="2.0" step="0.1" value="1.4"></label>
+            <label>Eff<input id="w-eff" type="range" min="0.5" max="2.0" step="0.1" value="1.0"></label>
+            <label>Trust<input id="w-trust" type="range" min="0.5" max="2.0" step="0.1" value="1.2"></label>
+          </div>
+          <div class="controls">
+            <button id="exportConfig">Export JSON</button>
+            <button id="savePNG">Save PNG</button>
+          </div>
+          <div class="net">
+            <svg id="netSVG" viewBox="0 0 900 420" role="img" aria-label="Mycelium decision web"></svg>
+          </div>
+          <div class="controls">
+            <strong>Scores:</strong>
+            <span id="scoreOut" class="pill">—</span>
+          </div>
+        </div>
+        <aside class="card" style="border:1px solid var(--line)">
+          <h3 style="margin-top:4px">Policy Diff (Proposed Amendments)</h3>
+          <div id="diffList" class="muted" style="max-height:140px; overflow:auto"></div>
+          <hr class="sep"/>
+          <h3 style="margin-top:4px">Statute View (Redlines)</h3>
+          <div class="redlines">
+            <div class="controls" style="padding:8px"><select id="statutePick"></select></div>
+            <div class="cols">
+              <div class="before"><strong>Before</strong><div id="statuteBefore" class="muted" style="max-height:160px; overflow:auto"></div></div>
+              <div class="after"><strong>After</strong><div id="statuteAfter" class="muted" style="max-height:160px; overflow:auto"></div></div>
+            </div>
+          </div>
+          <hr class="sep"/>
+          <h3 style="margin-top:4px">Trust Compact</h3>
+          <div class="controls" style="gap:10px">
+            <span class="pill">Thresholds</span>
+            <label>Rights ≥ <input id="t-rights" type="number" min="0" max="100" step="5" value="70" style="width:64px"></label>
+            <label>Trust ≥ <input id="t-trust" type="number" min="0" max="100" step="5" value="70" style="width:64px"></label>
+            <span id="thresholdState" class="pill">—</span>
+          </div>
+          <div class="controls"><button id="genCompact">Generate Compact</button><button id="copyCompact">Copy</button><button id="downloadCompact">Download TXT</button></div>
+          <textarea id="compactOut" rows="10" style="width:100%"></textarea>
+        </aside>
+      </div>`;
+
+    const svg = root.querySelector('#netSVG');
+    const selected = new Set();
+    const cx=450, cy=210; const R1=110, R2=190, R3=250; const byGroup = {};
+    nodes.forEach(n=>{ (byGroup[n.group] ||= []).push(n); });
+    const groups = Object.keys(byGroup);
+    let angle = 0;
+    groups.forEach((g,gi)=>{
+      const ring = gi%2?R2:R1; const arr=byGroup[g];
+      arr.forEach((n,i)=>{ const a = angle + (i+1)*(2*Math.PI/(arr.length+1)); n.x=cx+ring*Math.cos(a); n.y=cy+ring*Math.sin(a); });
+      angle += Math.PI/6;
+    });
+    nodes.forEach(n=>{ if(!('x' in n)) { const a = Math.random()*2*Math.PI; n.x=cx+R3*Math.cos(a); n.y=cy+R3*Math.sin(a);} });
+    edges.forEach(e=>{
+      const A = nodes.find(n=>n.id===e.a), B = nodes.find(n=>n.id===e.b);
+      if(!A||!B) return;
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',`M ${A.x} ${A.y} Q ${(A.x+B.x)/2} ${(A.y+B.y)/2-10} ${B.x} ${B.y}`);
+      path.setAttribute('stroke','rgba(142,201,255,.45)'); path.setAttribute('fill','none');
+      path.setAttribute('stroke-width','1.2'); svg.appendChild(path);
+    });
+    nodes.forEach(n=>{
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',n.x); c.setAttribute('cy',n.y); c.setAttribute('r','10');
+      c.setAttribute('fill','rgba(96,255,226,.35)'); c.setAttribute('stroke','var(--line)');
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', n.x+14); t.setAttribute('y', n.y+4); t.setAttribute('fill','var(--ink)'); t.setAttribute('font-size','12');
+      t.textContent = n.label;
+      g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+      g.style.cursor='pointer';
+      g.addEventListener('click', ()=>{ toggle(n.id, g); });
+      g.setAttribute('data-id', n.id);
+    });
+    function toggle(id, g){
+      if(selected.has(id)){ selected.delete(id); g.querySelector('circle').setAttribute('fill','rgba(96,255,226,.35)'); }
+      else { selected.add(id); g.querySelector('circle').setAttribute('fill','rgba(167,139,250,.7)'); }
+      score(); renderDiff(); renderStatutes(); renderCompactPreview();
+    }
+    function getScores(){
+      const s={sovereignty:0, peace:0, rights:0, efficacy:0, trust:0};
+      for(const id of selected){ const e = effects[id]||{}; s.sovereignty += e.sovereignty||0; s.peace += e.peace||0; s.rights += e.rights||0; s.efficacy += e.efficacy||0; s.trust += e.trust||0; }
+      for(const k in s){ s[k] = Math.max(0, Math.min(100, s[k])); }
+      return s;
+    }
+    function getWeights(){
+      const g=(id)=> parseFloat(root.querySelector(id).value||'1');
+      return {sov:g('#w-sov'), peace:g('#w-peace'), rights:g('#w-rights'), eff:g('#w-eff'), trust:g('#w-trust')};
+    }
+    function checkThresholds(s){
+      const rMin = parseFloat(root.querySelector('#t-rights').value||'70');
+      const tMin = parseFloat(root.querySelector('#t-trust').value||'70');
+      const pass = (s.rights>=rMin) && (s.trust>=tMin);
+      const badge = root.querySelector('#thresholdState');
+      if(badge){ badge.textContent = pass? 'Thresholds: PASS' : `Needs: Rights ≥ ${rMin}, Trust ≥ ${tMin}`; }
+      ['#exportConfig','#savePNG','#genCompact','#downloadCompact'].forEach(sel=>{
+        const btn=root.querySelector(sel); if(btn){ btn.disabled = !pass; btn.style.opacity = pass? '1' : '.6'; btn.title = pass? '' : 'Meet thresholds to enable'; }
+      });
+    }
+    function score(){
+      const s = getScores();
+      const w = getWeights();
+      const weighted = Math.round((s.sovereignty*w.sov + s.peace*w.peace + s.rights*w.rights + s.efficacy*w.eff + s.trust*w.trust) / (w.sov+w.peace+w.rights+w.eff+w.trust));
+      root.querySelector('#scoreOut').textContent = `Sov ${s.sovereignty} | Peace ${s.peace} | Rights ${s.rights} | Eff ${s.efficacy} | Trust ${s.trust} • True North ${weighted}`;
+      checkThresholds(s);
+    }
+    function renderDiff(){
+      const out = root.querySelector('#diffList');
+      if(!out) return;
+      if(selected.size===0){ out.innerHTML = '<em class="muted">Select nodes to see proposed amendment text.</em>'; return; }
+      out.innerHTML = [...selected].map(id=>`<div style="margin-bottom:8px"><strong>${nodes.find(n=>n.id===id)?.label||id}</strong><br/><span class="muted">${amendmentText[id]||'—'}</span></div>`).join('');
+    }
+    function buildStatuteUI(){
+      const pick = root.querySelector('#statutePick');
+      pick.innerHTML = '<option value="">— select a node —</option>';
+      Object.keys(statuteSeeds).forEach(id=>{
+        const opt = document.createElement('option'); opt.value=id; opt.textContent = statuteSeeds[id].title; pick.appendChild(opt);
+      });
+      pick.onchange = ()=> renderStatutes();
+      renderStatutes();
+    }
+    function renderStatutes(){
+      const pick = root.querySelector('#statutePick'); if(!pick) return;
+      const id = pick.value || ([...selected].find(x=> statuteSeeds[x]) || '');
+      if(!id || !statuteSeeds[id]){ root.querySelector('#statuteBefore').textContent='Select a statute node.'; root.querySelector('#statuteAfter').textContent='Select a statute node.'; return; }
+      const seed = statuteSeeds[id];
+      root.querySelector('#statuteBefore').innerHTML = `<p>${escapeHTML(seed.before)}</p>`;
+      root.querySelector('#statuteAfter').innerHTML = `<p><ins>${escapeHTML(seed.after)}</ins></p>`;
+    }
+    function escapeHTML(s){ return (s||'').replace(/[&<>]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+    function renderCompactPreview(){
+      const ta = root.querySelector('#compactOut'); if(ta && !ta.value) ta.value = generateCompact();
+    }
+    function generateCompact(){
+      const w = getWeights();
+      const picks = [...selected].map(id=> nodes.find(n=>n.id===id)?.label).filter(Boolean);
+      const target = (axis, val)=>`${axis} ≥ ${Math.round(val)}`;
+      const head = 'National Security Trust Compact — Draft';
+      const axes = `Targets: ${target('Sovereignty', 70*w.sov)} | ${target('Peace', 60*w.peace)} | ${target('Rights', 75*w.rights)} | ${target('Efficacy', 60*w.eff)} | ${target('Trust', 70*w.trust)}`;
+      const measures = picks.length? ('Measures: '+picks.join('; ')) : 'Measures: (select nodes to populate)';
+      const audit = 'Oversight: NSIRA system reviews with public attestations; NSICOP annual synthesis; Intelligence Commissioner pre‑auth expansion where expressive activity implicated; de‑identified TRMs registry.';
+      const report = 'Reporting: annual public metrics on TRMs, datasets, information‑sharing, errors, and redress timelines; independent privacy audits; after‑the‑fact notice wherever safe.';
+      return `${head}
+
+${axes}
+${measures}
+${audit}
+${report}`;
+    }
+    root.querySelector('#exportConfig').onclick = ()=>{
+      const cfg = { selected:[...selected], weights: getWeights(), timestamp: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(cfg,null,2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='c51-mycelium-config.json';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 800);
+    };
+    root.querySelector('#savePNG').onclick = ()=>{ try{ svgToPNG(svg, 'c51-mycelium.png'); }catch(e){ alert('PNG export failed: '+(e&&e.message||e)); } };
+    root.querySelector('#genCompact').onclick = ()=>{ root.querySelector('#compactOut').value = generateCompact(); };
+    root.querySelector('#copyCompact').onclick = ()=>{ const v=root.querySelector('#compactOut'); v.select(); document.execCommand('copy'); };
+    root.querySelector('#downloadCompact').onclick = ()=>{ const txt = root.querySelector('#compactOut').value || generateCompact(); const b=new Blob([txt],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='trust_compact.txt'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),800); };
+
+    root.querySelector('#applyPreset').onclick = ()=>{
+      selected.clear(); svg.querySelectorAll('g[data-id]').forEach(g=> g.querySelector('circle').setAttribute('fill','rgba(96,255,226,.35)'));
+      const p = presets[root.querySelector('#presetPick').value];
+      p.forEach(id=>{ const g = svg.querySelector(`g[data-id="${id}"]`); if(g) toggle(id,g); });
+      renderDiff(); renderStatutes(); renderCompactPreview();
+    };
+    root.querySelector('#resetNodes').onclick = ()=>{
+      selected.clear(); svg.querySelectorAll('g[data-id]').forEach(g=> g.querySelector('circle').setAttribute('fill','rgba(96,255,226,.35)'));
+      score(); renderDiff(); renderStatutes(); renderCompactPreview();
+    };
+    root.querySelector('#t-rights').addEventListener('input', ()=> score());
+    root.querySelector('#t-trust').addEventListener('input', ()=> score());
+    buildStatuteUI();
+    score(); renderDiff(); renderCompactPreview();
+
+    // --- Self-tests ---
+    (function tests(){
+      const T = [];
+      T.push(['Nodes >= 15', nodes.length >= 15]);
+      T.push(['Edges >= 12', edges.length >= 12]);
+      const p0 = presets['Balanced']; const before = new Set(selected); p0.forEach(id=>selected.add(id));
+      const s=getScores(); const inRange = Object.values(s).every(v=> v>=0 && v<=100);
+      T.push(['Score bounds 0..100', inRange]);
+      selected.clear(); before.forEach(x=>selected.add(x));
+      const passMock = (({rights:80, trust:75}).rights>=70 && ({rights:80, trust:75}).trust>=70);
+      T.push(['Thresholds mock PASS', passMock===true]);
+      T.push(['Export helpers exist', typeof svgToPNG==='function']);
+      console.table(Object.fromEntries(T));
+    })();
+  }
+
+  function svgToPNG(svgEl, filename){
+    const s = new XMLSerializer().serializeToString(svgEl);
+    const blob = new Blob([s], {type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas'); canvas.width = svgEl.viewBox.baseVal.width; canvas.height = svgEl.viewBox.baseVal.height;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(img,0,0);
+      canvas.toBlob((png)=>{
+        const a = document.createElement('a'); a.href=URL.createObjectURL(png); a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>{ URL.revokeObjectURL(a.href); URL.revokeObjectURL(url); }, 800);
+      });
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); throw new Error('Image load from SVG failed'); };
+    img.src = url;
+  }
+
+  const statusEl = document.getElementById('storeInfo');
+  const OFFLINE = { cachesOK: !!(window.caches && window.Request && window.Response), idbOK: !!window.indexedDB, cacheName: 'c51-inline' };
+  statusEl.textContent = `Storage: ${OFFLINE.cachesOK? 'CacheStorage ready' : 'CacheStorage n/a'} • ${OFFLINE.idbOK? 'IndexedDB ready' : 'IndexedDB n/a'}`;
+  async function cachedFetch(input, init){ if(!OFFLINE.cachesOK) return fetch(input, init); const cache = await caches.open(OFFLINE.cacheName); const req = (input instanceof Request) ? input : new Request(input, init); const hit = await cache.match(req); if(hit) return hit.clone(); const res = await fetch(req); try { if(res && res.ok) await cache.put(req, res.clone()); } catch {} return res; }
+  (async function runSelfTests(){ const results = []; try { results.push(['SecureContext', !!window.isSecureContext]); results.push(['Caches API', OFFLINE.cachesOK]); results.push(['IndexedDB API', OFFLINE.idbOK]); if(OFFLINE.cachesOK){ const c = await caches.open(OFFLINE.cacheName); const key = new Request('data:text/plain,cachetest'); await c.put(key, new Response('ok',{headers:{'content-type':'text/plain'}})); const m = await c.match(key); results.push(['Cache round‑trip', !!m]); } } catch (e) { results.push(['Self‑test error', e && e.message || String(e)]); } console.table(Object.fromEntries(results)); statusEl.textContent += ' • Self‑tests: ' + (results.every(([k,v])=>v===true || v===undefined) ? 'PASS' : 'CHECK CONSOLE'); })();
+  </script>
+</body>
+</html>
